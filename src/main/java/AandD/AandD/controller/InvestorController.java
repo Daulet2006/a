@@ -1,45 +1,43 @@
 package AandD.AandD.controller;
 
 import AandD.AandD.model.Investor;
-import AandD.AandD.observer.StockMarket;
 import AandD.AandD.service.InvestorService;
 import AandD.AandD.strategy.InvestmentStrategyType;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-@Controller
+@CrossOrigin(origins = "http://localhost:5173")
+@RestController
 @RequestMapping("/investors")
 public class InvestorController {
     private final InvestorService investorService;
-    private final StockMarket stockMarket;
 
-    public InvestorController(InvestorService investorService, StockMarket stockMarket) {
+    public InvestorController(InvestorService investorService) {
         this.investorService = investorService;
-        this.stockMarket = stockMarket;
     }
 
     @GetMapping
-    public String getInvestors(Model model) {
-        List<Investor> investors = investorService.getAllInvestors();
-        model.addAttribute("investors", investors);
-        return "market";
+    public List<Investor> getAllInvestors() {
+        return investorService.getAllInvestors();
     }
 
-    @PostMapping("/add")
-    public String addInvestor(@RequestParam String name, @RequestParam InvestmentStrategyType strategy) {
-        Investor investor = investorService.addInvestor(name, strategy);
-        stockMarket.addObserver(investor);
-        return "redirect:/investors";
+    @PostMapping
+    public Investor addInvestor(@RequestParam String name, @RequestParam InvestmentStrategyType strategy) {
+        return investorService.addInvestor(name, strategy);
     }
 
-    @PostMapping("/delete")
-    public String deleteInvestor(@RequestParam Long id) {
-        Investor investor = investorService.getInvestorById(id);
-        stockMarket.removeObserver(investor);
+    @PutMapping("/{id}/strategy")
+    public void changeStrategy(@PathVariable Long id, @RequestParam InvestmentStrategyType newStrategy) {
+        investorService.changeStrategy(id, newStrategy);
+    }
+
+    @DeleteMapping("/{id}")
+    public void removeInvestor(@PathVariable Long id) {
         investorService.removeInvestor(id);
-        return "redirect:/investors";
+    }
+
+    @GetMapping("/{id}")
+    public Investor getInvestorById(@PathVariable Long id) {
+        return investorService.getInvestorById(id);
     }
 }

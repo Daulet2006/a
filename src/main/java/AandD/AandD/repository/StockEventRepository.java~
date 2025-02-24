@@ -1,0 +1,4 @@
+package AandD.AandD.repository;
+
+public class StockEventRepository {
+}

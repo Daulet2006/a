@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📈 Симуляция рынка</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-center mb-6">📈 Симуляция рынка</h1>
+
+    <!-- 🔹 Форма для запуска симуляции -->
+    <form action="/market/simulate-run" method="post" class="bg-white p-6 shadow-md rounded-lg max-w-md mx-auto">
+        <h2 class="text-xl font-semibold mb-4">Запустить симуляцию</h2>
+        <label class="block mb-2">
+            <span class="text-gray-700">Название акции:</span>
+            <input type="text" name="stockName" class="w-full border p-2 rounded" required>
+        </label>
+        <label class="block mb-2">
+            <span class="text-gray-700">Изменение цены (%):</span>
+            <input type="number" name="priceChange" class="w-full border p-2 rounded" required>
+        </label>
+        <label class="block mb-2">
+            <span class="text-gray-700">Описание события:</span>
+            <input type="text" name="event" class="w-full border p-2 rounded" required>
+        </label>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 w-full">Запустить</button>
+    </form>
+
+    <!-- 🔹 Лог симуляции (Thymeleaf) -->
+    <div class="bg-white p-6 shadow-md rounded-lg mt-6">
+        <h2 class="text-xl font-semibold mb-4">📜 История событий</h2>
+        <ul class="list-disc pl-6">
+            <li th:each="event : ${marketEvents}">
+                <span class="font-bold" th:text="${event.stockName}"></span>:
+                <span th:text="${event.priceChange} + '%'"></span> —
+                <span th:text="${event.event}"></span>
+            </li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>

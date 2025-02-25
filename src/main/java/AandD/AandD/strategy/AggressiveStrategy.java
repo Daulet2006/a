@@ -1,13 +1,25 @@
 package AandD.AandD.strategy;
 
+import AandD.AandD.websocket.StockMarketWebSocketHandler;
+import org.springframework.stereotype.Component;
 
+@Component
 public class AggressiveStrategy implements InvestmentStrategy {
+    private StockMarketWebSocketHandler webSocketHandler = new StockMarketWebSocketHandler();
+
+    public AggressiveStrategy() {
+        this.webSocketHandler = webSocketHandler;
+    }
+
     @Override
     public void execute(String investorName, String stock, int priceChange, String event) {
+        String message;
         if (priceChange > 0) {
-            System.out.println("🔥 " + investorName + " (Агрессивный) ПОКУПАЕТ " + stock + " (+ " + priceChange + "%)");
+            message = "🔥 " + investorName + " ПОКУПАЕТ " + stock + " (+ " + priceChange + "%)";
         } else {
-            System.out.println("⚠️ " + investorName + " (Агрессивный) ПРОДАЁТ " + stock + " (-" + priceChange + "%)");
+            message = "⚠️ " + investorName + " ПРОДАЁТ " + stock + " (-" + priceChange + "%)";
         }
+
+        webSocketHandler.broadcast(message);
     }
 }

@@ -1,29 +1,26 @@
 package AandD.AandD.observer;
 
-
-import AandD.AandD.model.Investor;
-import AandD.AandD.strategy.AggressiveStrategy;
-import AandD.AandD.strategy.ConservativeStrategy;
-import AandD.AandD.strategy.InvestmentStrategy;
-import AandD.AandD.strategy.InvestmentStrategyType;
+import AandD.AandD.model.StockEvent;
+import AandD.AandD.repository.InvestorRepository;
+import AandD.AandD.repository.StockEventRepository;
+import AandD.AandD.service.ObserverService;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 @Component
 public class StockMarket {
-    private final List<Investor> investors = new ArrayList<>();
+    private final StockEventRepository stockEventRepository;
+    private final InvestorRepository investorRepository;
+    private final ObserverService observerService;
+
     private final String[] stocks = {"AAPL", "TSLA", "GOOGL", "AMZN"};
     private final String[] events = {"скандал", "прорыв", "кризис", "прибыль"};
 
-    public void addObserver(Investor investor) {
-        investors.add(investor);
-    }
-
-    public void removeObserver(Investor investor) {
-        investors.remove(investor);
+    public StockMarket(StockEventRepository stockEventRepository, InvestorRepository investorRepository, ObserverService observerService) {
+        this.stockEventRepository = stockEventRepository;
+        this.investorRepository = investorRepository;
+        this.observerService = observerService;
     }
 
     public void marketEvent() {
@@ -34,11 +31,9 @@ public class StockMarket {
 
         System.out.println("\n📢 Новость: " + stock + " " + event + ", изменение: " + priceChange + "%");
 
-        for (Investor investor : investors) {
-            InvestmentStrategy strategy = investor.getStrategyType() == InvestmentStrategyType.AGGRESSIVE
-                    ? new AggressiveStrategy()
-                    : new ConservativeStrategy();
-            strategy.execute(investor.getName(), stock, priceChange, event);
-        }
+        StockEvent stockEvent = new StockEvent(null, stock, priceChange, event, null);
+        stockEventRepository.save(stockEvent);
+
+        observerService.notifyObservers(stockEvent);
     }
 }

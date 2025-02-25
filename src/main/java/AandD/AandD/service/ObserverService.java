@@ -6,6 +6,7 @@ import AandD.AandD.repository.InvestorRepository;
 import AandD.AandD.strategy.InvestmentStrategyType;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -19,40 +20,36 @@ public class ObserverService {
     }
 
     public void notifyObservers(StockEvent event) {
-        logService.clearLogs(); // Очищаем логи перед новой симуляцией
-        logService.addLog("📢 Рыночное событие: " + event.getStockName() + " | " + event.getPriceChange() + "% | " + event.getEvent());
+        logService.clearLogs();
+        List<String> messages = new ArrayList<>();
+
+        messages.add("📢 Рыночное событие: " + event.getStockName() + " | " + event.getPriceChange() + "% | " + event.getEvent());
 
         List<Investor> investors = investorRepository.findAll();
         for (Investor investor : investors) {
             if (investor.getStrategyType() == InvestmentStrategyType.CONSERVATIVE) {
-                handleConservativeInvestor(investor, event);
+                messages.add(handleConservativeInvestor(investor, event));
             } else {
-                handleAggressiveInvestor(investor, event);
+                messages.add(handleAggressiveInvestor(investor, event));
             }
         }
 
-        handleTradingBot(event);
+        logService.addLogs(messages);
     }
 
-    private void handleConservativeInvestor(Investor investor, StockEvent event) {
+    private String handleConservativeInvestor(Investor investor, StockEvent event) {
         if (event.getPriceChange() <= -5) {
-            logService.addLog("🏦 " + investor.getName() + " (Консервативный) покупает " + event.getStockName() + " после падения " + event.getPriceChange() + "%");
+            return "🏦 " + investor.getName() + " (Консервативный) покупает " + event.getStockName() + " после падения " + event.getPriceChange() + "%";
         }
+        return "🟡 " + investor.getName() + " (Консервативный) ждет изменений.";
     }
 
-    private void handleAggressiveInvestor(Investor investor, StockEvent event) {
+    private String handleAggressiveInvestor(Investor investor, StockEvent event) {
         if (event.getPriceChange() < -3) {
-            logService.addLog("🔥 " + investor.getName() + " (Агрессивный) покупает " + event.getStockName() + " после падения " + event.getPriceChange() + "%");
+            return "🔥 " + investor.getName() + " (Агрессивный) покупает " + event.getStockName() + " после падения " + event.getPriceChange() + "%";
         } else if (event.getPriceChange() > 3) {
-            logService.addLog("🚀 " + investor.getName() + " (Агрессивный) продаёт " + event.getStockName() + " после роста " + event.getPriceChange() + "%");
+            return "🚀 " + investor.getName() + " (Агрессивный) продаёт " + event.getStockName() + " после роста " + event.getPriceChange() + "%";
         }
-    }
-
-    private void handleTradingBot(StockEvent event) {
-        if (event.getEvent().contains("скандал") || event.getEvent().contains("⚠️")) {
-            logService.addLog("🤖 Бот продаёт все акции " + event.getStockName() + " из-за " + event.getEvent());
-        } else if (event.getEvent().contains("прорыв") || event.getEvent().contains("🚀")) {
-            logService.addLog("🤖 Бот покупает " + event.getStockName() + " после " + event.getEvent());
-        }
+        return "⚖️ " + investor.getName() + " (Агрессивный) не меняет позицию.";
     }
 }

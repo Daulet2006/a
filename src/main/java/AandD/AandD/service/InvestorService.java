@@ -21,7 +21,7 @@ public class InvestorService {
     }
 
     public Investor addInvestor(String name, InvestmentStrategyType strategy) {
-        Investor investor = new Investor(null, name, strategy);
+        Investor investor = new Investor(name, strategy); // ✅ Теперь id не передаем
         return investorRepository.save(investor);
     }
 

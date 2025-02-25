@@ -1,12 +1,26 @@
 package AandD.AandD.strategy;
 
+import AandD.AandD.websocket.StockMarketWebSocketHandler;
+import org.springframework.stereotype.Component;
+
+@Component
 public class ConservativeStrategy implements InvestmentStrategy {
+
+    private StockMarketWebSocketHandler webSocketHandler = new StockMarketWebSocketHandler();
+
+    public ConservativeStrategy() {
+        this.webSocketHandler = webSocketHandler;
+    }
+
     @Override
     public void execute(String investorName, String stock, int priceChange, String event) {
+        String message;
         if (priceChange > 3) {
-            System.out.println("🟢 " + investorName + " (Консервативный) ПОКУПАЕТ " + stock + " (+ " + priceChange + "%)");
+            message = "🟢 " + investorName + " ПОКУПАЕТ " + stock + " (+ " + priceChange + "%)";
         } else {
-            System.out.println("🟡 " + investorName + " (Консервативный) ОЖИДАЕТ изменений.");
+            message = "🟡 " + investorName + " ОЖИДАЕТ изменений.";
         }
+
+        webSocketHandler.broadcast(message);  // Отправка сообщения через WebSocket
     }
 }
